@@ -23,7 +23,7 @@ spec:
     spec:
       #hostNetwork: true
       containers:
-      - image: europe-west2-docker.pkg.dev/hyperscale-dev2-vqhx/repository/rmqtest:v2
+      - image: europe-west2-docker.pkg.dev/hyperscale-dev2-vqhx/repository/rmqtest:v3
         imagePullPolicy: IfNotPresent
         name: rmqtest
         env:

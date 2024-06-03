@@ -1,8 +1,11 @@
 package main
 
 import (
+	"crypto/tls"
 	"log"
+	"net/url"
 	"os"
+
 	"github.com/rabbitmq/amqp091-go"
 )
 
@@ -13,8 +16,26 @@ func failOnError(err error, msg string) {
 }
 
 func main() {
-        addr := os.Getenv("RMQ_CONNECTION_STRING")
-        conn, err := amqp091.Dial(addr)
+	addr := os.Getenv("RMQ_CONNECTION_STRING")
+
+	url, err := url.Parse(addr)
+	failOnError(err, "Failed to parse RMQ_CONNECTION_STRING")
+
+	// Create a custom TLS configuration if the scheme is "amqps"
+	var tlsConfig *tls.Config
+	if url.Scheme == "amqps" {
+		tlsConfig = &tls.Config{
+			InsecureSkipVerify: true,
+		}
+	}
+
+	// Dial with or without TLS based on the URL scheme
+	var conn *amqp091.Connection
+	if tlsConfig != nil {
+		conn, err = amqp091.DialTLS(addr, tlsConfig)
+	} else {
+		conn, err = amqp091.Dial(addr)
+	}
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 	channelClose := conn.NotifyClose(make(chan *amqp091.Error))
