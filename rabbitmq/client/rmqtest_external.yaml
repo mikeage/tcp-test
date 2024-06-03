@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    appname: rmqtest
+  name: rmqtest
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      appname: rmqtest
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        appname: rmqtest
+    spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      nodeSelector:
+        nodeType: external
+      tolerations:
+      - key: nodeTypeT
+        operator: Equal
+        value: externaltc
+      containers:
+      - image: europe-west2-docker.pkg.dev/hyperscale-dev2-vqhx/repository/rmqtest:v2
+        imagePullPolicy: IfNotPresent
+        name: rmqtest
+        env:
+        - name: RMQ_CONNECTION_STRING
+          value: "amqps://hyperscale_user:hyperscale_user1@b-cd70330c-587b-49bf-bd42-f18b6d276255.mq.eu-west-1.amazonaws.com:5671"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 50Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "1"
+      dnsPolicy: Default
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
