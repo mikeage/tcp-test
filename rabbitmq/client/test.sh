@@ -1,7 +1,7 @@
 kubectl apply -f rmqtest.yaml
 #kubectl apply -f rmqtest_external.yaml
 n=1
-while [ $n -lt 60 ]
+while [ $n -lt 80 ]
 do
 sleep 5
 n=`expr $n + 3`
