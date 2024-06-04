@@ -45,7 +45,7 @@ def main():
             time.sleep(1)
 
             try:
-                client_socket.sendall(str(counter).encode())
+                client_socket.sendall(f"ctr:{counter} from {POD_NAME}".encode())
                 _LOGGER.info("%s:%s\tSent %d", host, port, counter)
                 counter += 1
 
