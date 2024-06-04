@@ -27,7 +27,6 @@ def main():
     # List of sockets to monitor for incoming connections
     sockets_list = [server_socket]
     peer_info = {}
-    peer_pod_info = {}
 
     try:
         while True:
@@ -49,40 +48,31 @@ def main():
                     try:
                         message = notified_socket.recv(4096)
                         if message:
-                            if message.decode("utf-8").startswith("name:"):
-                                peer_pod_info[notified_socket] = message.decode(
-                                    "utf-8"
-                                ).split(":")[1]
-
                             _LOGGER.info(
-                                "%s\t%s\tReceived message: %s",
+                                "%s\tReceived message: %s",
                                 notified_socket.getpeername(),
-                                peer_pod_info.get(notified_socket, "Unknown"),
                                 message.decode("utf-8"),
                             )
                         else:
                             # No message means the client has closed the connection
                             _LOGGER.warning(
-                                "%s\t%s\tConnection closed",
+                                "%s\tConnection closed",
                                 peer_info.get(notified_socket, "Unknown"),
-                                peer_pod_info.get(notified_socket, "Unknown"),
                             )
                             sockets_list.remove(notified_socket)
                             notified_socket.close()
                     except ConnectionResetError:
                         _LOGGER.warning(
-                            "%s\t%s\tConnection reset",
+                            "%s\tConnection reset",
                             peer_info.get(notified_socket, "Unknown"),
-                            peer_pod_info.get(notified_socket, "Unknown"),
                         )
                         sockets_list.remove(notified_socket)
                         notified_socket.close()
 
             for notified_socket in exception_sockets:
                 _LOGGER.warning(
-                    "%s\t%s\tSocket exception",
+                    "%s\tSocket exception",
                     peer_info.get(notified_socket, "Unknown"),
-                    peer_pod_info.get(notified_socket, "Unknown"),
                 )
                 sockets_list.remove(notified_socket)
                 del peer_info[notified_socket]
