@@ -9,6 +9,7 @@ import logging
 # Define the server address and port to connect to
 TARGET_HOST = os.getenv("HOST", "127.0.0.1")
 TARGET_PORT = int(os.getenv("PORT", "12345"))
+POD_NAME = os.getenv("POD_NAME", "n/a")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -39,14 +40,14 @@ def main():
         )
         counter = 0
 
+        client_socket.sendall(f"name:{POD_NAME}".encode())
         while True:
+            time.sleep(1)
+
             try:
                 client_socket.sendall(str(counter).encode())
                 _LOGGER.info("%s:%s\tSent %d", host, port, counter)
                 counter += 1
-
-                # Wait for one second before sending the next byte
-                time.sleep(1)
 
             except (BrokenPipeError, ConnectionResetError) as e:
                 _LOGGER.warning("%s:%s\tConnection error: %s", host, port, e)
