@@ -7,7 +7,10 @@ import socket
 HOST = "0.0.0.0"
 PORT = 12345
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
+)
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -23,6 +26,7 @@ def main():
 
     # List of sockets to monitor for incoming connections
     sockets_list = [server_socket]
+    peer_info = {}
 
     try:
         while True:
@@ -35,8 +39,9 @@ def main():
                 # If the notified socket is the server socket, it means a new connection is coming in
                 if notified_socket == server_socket:
                     client_socket, client_address = server_socket.accept()
+                    peer_info[client_socket] = client_address
                     sockets_list.append(client_socket)
-                    _LOGGER.info("Accepted new connection from %s", client_address)
+                    _LOGGER.info("%s\tAccepted new connection", client_address)
 
                 # Otherwise, it's an existing connection sending data
                 else:
@@ -44,27 +49,32 @@ def main():
                         message = notified_socket.recv(4096)
                         if message:
                             _LOGGER.info(
-                                "Received message from %s: %s",
+                                "%s\tReceived message: %s",
                                 notified_socket.getpeername(),
                                 message.decode("utf-8"),
                             )
                         else:
                             # No message means the client has closed the connection
                             _LOGGER.warning(
-                                "Connection closed by %s", notified_socket.getpeername()
+                                "%s\tConnection closed",
+                                peer_info.get(notified_socket, "Unknown"),
                             )
                             sockets_list.remove(notified_socket)
                             notified_socket.close()
                     except ConnectionResetError:
                         _LOGGER.warning(
-                            "Connection reset by peer %s", notified_socket.getpeername()
+                            "%s\tConnection reset",
+                            peer_info.get(notified_socket, "Unknown"),
                         )
                         sockets_list.remove(notified_socket)
                         notified_socket.close()
 
             for notified_socket in exception_sockets:
-                _LOGGER.warning("Socket exception on %s", notified_socket.getpeername())
+                _LOGGER.warning(
+                    "%s\tSocket exception", peer_info.get(notified_socket, "Unknown")
+                )
                 sockets_list.remove(notified_socket)
+                del peer_info[notified_socket]
                 notified_socket.close()
 
     except KeyboardInterrupt:
