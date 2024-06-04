@@ -1,4 +1,6 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring,line-too-long,too-many-nested-blocks
+import signal
+import sys
 import socket
 import time
 import os
@@ -13,6 +15,14 @@ logging.basicConfig(
     format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
 )
 _LOGGER = logging.getLogger(__name__)
+
+
+def handle_sigterm(__signum__, __frame__):
+    _LOGGER.warning("Received SIGTERM")
+    sys.exit(0)
+
+
+signal.signal(signal.SIGTERM, handle_sigterm)
 
 
 def main():
