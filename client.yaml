@@ -16,7 +16,7 @@ spec:
       # hostNetwork: true
       containers:
         - name: tcp-test-client
-          image: mikeage/tcp-test-client:v1
+          image: mikeage/tcp-test-client:v2
           env:
             - name: HOST
               value: remote_target.address
