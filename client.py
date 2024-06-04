@@ -5,10 +5,13 @@ import os
 import logging
 
 # Define the server address and port to connect to
-HOST = os.getenv("HOST", "127.0.0.1")
-PORT = int(os.getenv("PORT", "12345"))
+TARGET_HOST = os.getenv("HOST", "127.0.0.1")
+TARGET_PORT = int(os.getenv("PORT", "12345"))
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
+)
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -18,25 +21,32 @@ def main():
 
     try:
         # Connect to the server
-        client_socket.connect((HOST, PORT))
-        _LOGGER.info("Connected to %s:%s", HOST, PORT)
+        client_socket.connect((TARGET_HOST, TARGET_PORT))
+        host, port = client_socket.getpeername()
+
+        _LOGGER.info(
+            "%s:%s\tconnected (to %s:%s)", host, port, TARGET_HOST, TARGET_PORT
+        )
         counter = 0
 
         while True:
             try:
                 client_socket.sendall(str(counter).encode())
-                _LOGGER.info("Sent %d to the server", counter)
+                _LOGGER.info("%s:%s\tSent %d", host, port, counter)
                 counter += 1
 
                 # Wait for one second before sending the next byte
                 time.sleep(1)
 
             except (BrokenPipeError, ConnectionResetError) as e:
-                _LOGGER.warning("Connection error: %s", e)
+                _LOGGER.warning("%s:%s\tConnection error: %s", host, port, e)
+                break
+            except Exception as e:  # pylint: disable=broad-except
+                _LOGGER.error("%s:%s\tUnexpected error: %s", host, port, e)
                 break
 
     except ConnectionRefusedError:
-        _LOGGER.info("Failed to connect to %s:%s", HOST, PORT)
+        _LOGGER.info("%s:%s\tConnection refused", TARGET_HOST, TARGET_PORT)
 
     finally:
         client_socket.close()
