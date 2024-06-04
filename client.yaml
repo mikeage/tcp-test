@@ -16,7 +16,7 @@ spec:
       # hostNetwork: true
       containers:
         - name: tcp-test-client
-          image: mikeage/tcp-test-client:v3
+          image: mikeage/tcp-test-client:v5
           env:
             - name: POD_NAME
               valueFrom:
@@ -24,3 +24,5 @@ spec:
                   fieldPath: metadata.name
             - name: HOST
               value: remote_target.address
+            - name: SOURCE_PORT
+              value: "0"

@@ -7,6 +7,7 @@ import os
 import logging
 
 # Define the server address and port to connect to
+SOURCE_PORT = int(os.getenv("SOURCE_PORT", "0"))
 TARGET_HOST = os.getenv("HOST", "127.0.0.1")
 TARGET_PORT = int(os.getenv("PORT", "12345"))
 POD_NAME = os.getenv("POD_NAME", "n/a")
@@ -32,6 +33,7 @@ def main():
 
     try:
         # Connect to the server
+        client_socket.bind(("", SOURCE_PORT))
         client_socket.connect((TARGET_HOST, TARGET_PORT))
         host, port = client_socket.getpeername()
 
