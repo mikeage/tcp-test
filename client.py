@@ -35,14 +35,23 @@ def main():
         # Connect to the server
         client_socket.bind(("", SOURCE_PORT))
         client_socket.connect((TARGET_HOST, TARGET_PORT))
+        local_host, local_port = client_socket.getsockname()
         host, port = client_socket.getpeername()
 
         _LOGGER.info(
-            "%s:%s\tconnected (to %s:%s)", host, port, TARGET_HOST, TARGET_PORT
+            "%s:%s\tconnected (%s:%s to %s:%s)",
+            host,
+            port,
+            local_host,
+            local_port,
+            TARGET_HOST,
+            TARGET_PORT,
         )
         counter = 0
 
-        client_socket.sendall(f"name:{POD_NAME}".encode())
+        client_socket.sendall(
+            f"name:{POD_NAME}, source:{local_host}:{local_port} dest:{host}:{port}".encode()
+        )
         while True:
             time.sleep(1)
 
