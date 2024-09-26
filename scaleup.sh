@@ -1,3 +1,4 @@
+#!/bin/bash
 kubectl apply -n default -f client.yaml
 n=1
 while [ $n -lt 60 ]
